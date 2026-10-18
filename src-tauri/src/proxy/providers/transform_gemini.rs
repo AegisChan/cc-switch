@@ -1,4 +1,4 @@
-//! Gemini Native format conversion module.
+﻿//! Gemini Native format conversion module.
 //!
 //! Converts Anthropic Messages requests to Gemini `generateContent` requests,
 //! and Gemini `GenerateContentResponse` payloads back to Anthropic Messages
@@ -687,9 +687,9 @@ fn convert_message_content_to_parts(
                 // on every functionCall in a multi-turn tool-use exchange.
                 // Without replaying the stored signature the upstream may
                 // reject with "missing a `thought_signature`".
-                if let Some(sig) = thought_signature_by_id.get(id) {
-                    function_call["thoughtSignature"] = json!(sig);
-                }
+                let sig = thought_signature_by_id.get(id).map(|s| s.as_str()).unwrap_or("");
+                function_call["thought_signature"] = json!(sig);
+                function_call["thoughtSignature"] = json!(sig);
 
                 parts.push(json!({ "functionCall": function_call }));
             }
