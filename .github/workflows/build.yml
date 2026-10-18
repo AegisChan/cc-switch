@@ -1,4 +1,4 @@
-﻿name: Build CC Switch
+﻿name: Build CC Switch Installer
 
 on:
   push:
@@ -27,11 +27,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build Tauri Binary
-        run: pnpm tauri build --no-bundle
+      - name: Disable updater signing and build full installer
+        run: |
+          node -e "const fs=require('fs'); const p='src-tauri/tauri.conf.json'; const c=JSON.parse(fs.readFileSync(p,'utf8')); if(c.bundle&&c.bundle.createUpdaterArtifacts) c.bundle.createUpdaterArtifacts=false; if(c.plugins&&c.plugins.updater) c.plugins.updater.pubkey=''; fs.writeFileSync(p, JSON.stringify(c, null, 2));"
+          pnpm tauri build
 
-      - name: Upload Artifact
+      - name: Upload Installer Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: CC-Switch-Fixed-Binary
-          path: src-tauri/target/release/cc-switch.exe
+          name: CC-Switch-Full-Installer
+          path: |
+            src-tauri/target/release/bundle/nsis/*setup.exe
+            src-tauri/target/release/cc-switch.exe
